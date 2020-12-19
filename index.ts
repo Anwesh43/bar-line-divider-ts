@@ -4,7 +4,7 @@ const parts : number = 2
 const lines : number = 5 
 const scGap : number = 0.02 
 const strokeFactor : number = 90 
-const sizeFactor : number = 4.9 
+const sizeFactor : number = 8.9 
 const delay : number = 20 
 const backColor : string = "#BDBDBD"
 const colors : Array<string> = [
@@ -22,7 +22,7 @@ class ScaleUtil {
     }
 
     static divideScale(scale : number, i : number, n : number) : number {
-        return Math.min(1 / n, ScaleUtil.divideScale(scale, i, n)) * n 
+        return Math.min(1 / n, ScaleUtil.maxScale(scale, i, n)) * n 
     }
 
     static sinify(scale : number) : number {
@@ -43,7 +43,8 @@ class DrawingUtil {
         const size : number = Math.min(w, h) / sizeFactor 
         const sc1 : number = ScaleUtil.divideScale(scale, 0, parts)
         const sc2 : number = ScaleUtil.divideScale(scale, 1, parts)
-        const gap : number = (2 * size) / lines 
+        console.log(sc1, sc2)
+        const gap : number = (2 * size) / (lines - 1) 
         context.save()
         context.translate(w / 2, h / 2)
         for (var j = 0; j < 2; j++) {
@@ -54,7 +55,7 @@ class DrawingUtil {
         }
         for (var j = 0; j < lines; j++) {
             const sc1j : number = ScaleUtil.divideScale(sc1, j, lines)
-            const sc2j : number = ScaleUtil.divideScale(sc2, j, parts)
+            const sc2j : number = ScaleUtil.divideScale(sc2, j, lines)
             context.save()
             context.translate(-size / 2, -size - gap * j)
             DrawingUtil.drawLine(context, size * sc2j, 0, size * sc1j, 0)
@@ -226,10 +227,12 @@ class Renderer {
 
     handleTap(cb : Function) {
         this.bld.startUpdating(() => {
-            cb()
-            this.bld.update(() => {
-                this.animator.stop()
+            this.animator.start(() => {
                 cb()
+                this.bld.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
             })
         })
     }
