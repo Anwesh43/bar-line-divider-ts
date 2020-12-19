@@ -210,3 +210,23 @@ class BarLineDivider {
         this.curr.startUpdating(cb)
     }
 }
+
+class Renderer {
+
+    bld : BarLineDivider = new BarLineDivider()
+    animator : Animator = new Animator()
+
+    render(context : CanvasRenderingContext2D) {
+        this.bld.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.bld.startUpdating(() => {
+            cb()
+            this.bld.update(() => {
+                this.animator.stop()
+                cb()
+            })
+        })
+    }
+}
